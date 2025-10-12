@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: exchange-generator-service
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            token-uri: http://keycloak:8080/realms/bank/protocol/openid-connect/token
+            jwk-set-uri: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
+        registration:
+          generator:
+            provider: keycloak
+            client-id: exchange-generator
+            client-secret: ${GENERATOR_CLIENT_SECRET:vhrBAR45NLul2OKWXHnjH8wXOQMMfOlP}
+            authorization-grant-type: client_credentials
+
+exchange.base-url: http://gateway:8080
+
+management.endpoints.web.exposure.include: health,info
+
+logging.level.org.springframework.security.oauth2.client: INFO

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+      http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- 1. users -->
+    <changeSet id="20250711-2" author="grok">
+        <sql>
+            CREATE TABLE accounts.users (
+                                            id           UUID PRIMARY KEY,
+                                            keycloak_id  UUID NOT NULL,
+                                            first_name   VARCHAR(50)  NOT NULL,
+                                            last_name    VARCHAR(50)  NOT NULL,
+                                            email        VARCHAR(100) NOT NULL,
+                                            birth_date   DATE         NOT NULL,
+                                            created_at   TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                            updated_at   TIMESTAMPTZ,
+                                            version      BIGINT       NOT NULL DEFAULT 0,
+                                            CONSTRAINT unique_keycloak_id UNIQUE (keycloak_id),
+                                            CONSTRAINT unique_email      UNIQUE (email)
+            );
+        </sql>
+        <rollback><sql>DROP TABLE accounts.users;</sql></rollback>
+    </changeSet>
+
+    <!-- 2. accounts -->
+    <changeSet id="20250711-3" author="grok">
+        <sql>
+            CREATE TABLE accounts.accounts (
+                                               id          UUID PRIMARY KEY,
+                                               user_id     UUID NOT NULL REFERENCES accounts.users(id),
+                                               currency    VARCHAR(3) NOT NULL CHECK (currency IN ('RUB','USD','CNY')),
+                                               balance     DECIMAL(15,2) NOT NULL DEFAULT 0.00 CHECK (balance &gt;= 0.00),
+                                               created_at  TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                               updated_at  TIMESTAMPTZ,
+                                               version     BIGINT        NOT NULL DEFAULT 0,
+                                               CONSTRAINT unique_user_currency UNIQUE (user_id, currency)
+            );
+        </sql>
+        <rollback><sql>DROP TABLE accounts.accounts;</sql></rollback>
+    </changeSet>
+
+    <!-- 3. индексы -->
+    <changeSet id="20250711-4" author="grok">
+        <sql>
+            CREATE INDEX idx_users_keycloak_id  ON accounts.users(keycloak_id);
+            CREATE INDEX idx_users_email        ON accounts.users(email);
+            CREATE INDEX idx_accounts_user_id   ON accounts.accounts(user_id);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX IF EXISTS accounts.idx_users_keycloak_id;</sql>
+            <sql>DROP INDEX IF EXISTS accounts.idx_users_email;</sql>
+            <sql>DROP INDEX IF EXISTS accounts.idx_accounts_user_id;</sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

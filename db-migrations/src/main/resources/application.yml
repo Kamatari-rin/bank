@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: db-migrations
+  config:
+    import: optional:consul:consul:8500 # Исправлено: указываем хост и порт Consul
+  cloud:
+    consul:
+      host: consul # Имя сервиса Consul в Docker Compose
+      port: 8500
+      config:
+        enabled: true
+        prefix: config
+        default-context: db-migrations
+        profile-separator: '::'
+
+db:
+  migrations:
+    databases:
+      accounts:
+        url: jdbc:postgresql://postgres:5432/bank?currentSchema=accounts
+        username: accounts_service_user
+        password: accounts_service_password
+        changelog: classpath:db/changelog/accounts-service/changelog-accounts-service.xml
+      cash:
+        url: jdbc:postgresql://postgres:5432/bank?currentSchema=cash
+        username: cash_service_user
+        password: cash_service_password
+        changelog: classpath:db/changelog/cash-service/changelog-cash-service.xml
+      transfer:
+        url: jdbc:postgresql://postgres:5432/bank?currentSchema=transfer
+        username: transfer_service_user
+        password: transfer_service_password
+        changelog: classpath:db/changelog/transfer-service/changelog-transfer-service.xml
+      exchange:
+        url: jdbc:postgresql://postgres:5432/bank?currentSchema=exchange
+        username: exchange_service_user
+        password: exchange_service_password
+        changelog: classpath:db/changelog/exchange-service/changelog-exchange-service.xml
+      blocker:
+        url: jdbc:postgresql://postgres:5432/bank?currentSchema=blocker
+        username: blocker_service_user
+        password: blocker_service_password
+        changelog: classpath:db/changelog/blocker-service/changelog-blocker-service.xml
+      notifications:
+        url: jdbc:postgresql://postgres:5432/bank?currentSchema=notifications
+        username: notifications_service_user
+        password: notifications_service_password
+        changelog: classpath:db/changelog/notifications-service/changelog-notifications-service.xml
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: Database migrations module
+    version: 1.0.0

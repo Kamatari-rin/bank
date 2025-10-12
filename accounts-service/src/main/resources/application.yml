@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: accounts-service
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/bank?currentSchema=accounts
+    username: accounts_service_user
+    password: accounts_service_password
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+
+  liquibase:
+    enabled: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
+
+keycloak:
+  admin:
+    base-url: ${KC_BASE_URL:http://keycloak:8080}
+    realm:    ${KC_REALM:bank}
+    client-id: ${KC_CLIENT_ID:accounts-service}
+    client-secret: ${KC_CLIENT_SECRET:changeme}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+
+logging:
+  level:
+    org.springframework.security: DEBUG
