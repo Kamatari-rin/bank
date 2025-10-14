@@ -1,4 +1,3 @@
-// src/main/java/com/example/web/PublicBrowseController.java
 package com.example.web;
 
 import com.example.dto.publicview.PublicAccountDto;

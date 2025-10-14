@@ -43,7 +43,7 @@ public class BlockerServiceImpl {
             score += 50; // дотолкнёт к deny
         }
 
-        boolean allowed = score < 70; // простая пороговая модель
+        boolean allowed = score < 70;
         var reason = allowed ? "ok" : "suspicious_operation";
         log.info("blocker.check op={} amount={} night={} rnd={} score={} -> {}",
                 r.operation(), r.amount(), isNight, rnd, score, allowed ? "ALLOW" : "DENY");

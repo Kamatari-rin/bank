@@ -36,7 +36,6 @@ public class SecurityConfig {
 
     private static AbstractAuthenticationToken toAuth(Jwt jwt) {
         var auths = new ArrayList<GrantedAuthority>(extractClientRoles(jwt));
-        // На крайний случай: разрешим конкретным azp (необязательно)
         var azp = jwt.getClaimAsString("azp");
         if ("cash-service".equals(azp) || "transfer-service".equals(azp)) {
             auths.add(new SimpleGrantedAuthority("ROLE_blocker-check"));

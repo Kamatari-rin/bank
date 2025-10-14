@@ -16,7 +16,6 @@ public class AdultValidator implements ConstraintValidator<Adult, LocalDate> {
     @Override
     public boolean isValid(LocalDate birthDate, ConstraintValidatorContext context) {
         if (birthDate == null) return false;
-        // 18+ => дата рождения + 18 лет не должна быть после сегодняшнего дня
         return !birthDate.plusYears(min).isAfter(LocalDate.now());
     }
 }

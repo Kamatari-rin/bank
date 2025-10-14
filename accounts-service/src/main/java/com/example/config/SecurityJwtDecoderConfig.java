@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
-import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 
 @Configuration
 public class SecurityJwtDecoderConfig {
@@ -15,7 +14,6 @@ public class SecurityJwtDecoderConfig {
 
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwks).build();
 
-        // Без проверки issuer
         OAuth2TokenValidator<Jwt> validator = JwtValidators.createDefault();
         decoder.setJwtValidator(validator);
 

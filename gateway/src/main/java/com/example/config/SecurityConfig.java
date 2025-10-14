@@ -46,10 +46,6 @@ public class SecurityConfig {
         return new ForwardedHeaderTransformer();
     }
 
-    /**
-     * Единственный глобальный фильтр: добавляет X-User-* из JWT.
-     * Если запрос анонимный (регистрация) — пропускаем без заголовков.
-     */
     @Bean
     public GlobalFilter userContextHeadersFilter() {
         return (exchange, chain) ->

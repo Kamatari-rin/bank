@@ -19,7 +19,7 @@ public class AccountsClient {
 
     private String getServiceToken() {
         var authReq = OAuth2AuthorizeRequest.withClientRegistrationId("cash-service")
-                .principal("cash-service") // фиктивный principal ID для cc
+                .principal("cash-service")
                 .build();
         var client = clientManager.authorize(authReq);
         if (client == null || client.getAccessToken() == null) {

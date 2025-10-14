@@ -23,7 +23,7 @@ public final class BlockerDtos {
     public record CheckResponse(
             boolean allowed,
             String reason,
-            int score // 0..100, чем выше — тем «подозрительнее»
+            int score
     ) {
         public static CheckResponse ok() { return new CheckResponse(true, "ok", 0); }
         public static CheckResponse deny(String reason, int score) { return new CheckResponse(false, reason, score); }

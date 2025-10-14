@@ -12,7 +12,7 @@ public record RegistrationRequest(
         @Email @NotBlank String email,
         @NotNull @Adult LocalDate birthDate
 ) {
-    /** Возвращает копию, но с нормализованным email */
+
     public RegistrationRequest withEmail(String normalizedEmail) {
         return new RegistrationRequest(username, password, firstName, lastName, normalizedEmail, birthDate);
     }

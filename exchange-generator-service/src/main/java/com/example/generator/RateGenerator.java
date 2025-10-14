@@ -67,7 +67,7 @@ public class RateGenerator {
     }
 
     private static double jiggle(double base, double spread) {
-        if (spread <= 0.0) return base;               // ключевой фикс
+        if (spread <= 0.0) return base;
         double delta = ThreadLocalRandom.current().nextDouble(-spread, spread);
         return Math.max(0.0001, base + delta);
     }

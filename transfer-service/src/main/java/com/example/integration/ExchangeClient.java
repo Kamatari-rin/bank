@@ -45,7 +45,7 @@ public class ExchangeClient {
         if (!"RUB".equalsIgnoreCase(from)) {
             var r = rates.get(from);
             if (r == null) throw new IllegalStateException("No rate for " + from);
-            var sell = new BigDecimal(r.get("sell").toString());  // RUB за 1 from
+            var sell = new BigDecimal(r.get("sell").toString());
             rub = amount.multiply(sell);
         }
         if ("RUB".equalsIgnoreCase(to)) return rub;

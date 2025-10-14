@@ -8,5 +8,5 @@ import java.util.UUID;
 public record TransferRequest(
         @NotNull UUID fromAccountId,
         @NotNull UUID toAccountId,
-        @NotNull @Positive BigDecimal amount // в валюте from
+        @NotNull @Positive BigDecimal amount
 ) {}

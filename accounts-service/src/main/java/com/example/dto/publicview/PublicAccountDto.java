@@ -4,5 +4,5 @@ import java.util.UUID;
 
 public record PublicAccountDto(
         UUID id,
-        String currency       // RUB | USD | CNY
+        String currency
 ) {}

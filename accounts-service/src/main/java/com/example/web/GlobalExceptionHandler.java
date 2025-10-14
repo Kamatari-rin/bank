@@ -38,12 +38,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, ex);
     }
 
-    // === WebClient (reactive) исключения ===
     @ExceptionHandler(org.springframework.web.reactive.function.client.WebClientResponseException.class)
     ResponseEntity<ApiError> handleWebClient(org.springframework.web.reactive.function.client.WebClientResponseException ex) {
         HttpStatus status;
         if (ex.getStatusCode().is4xxClientError()) {
-            status = HttpStatus.BAD_GATEWAY; // прокси-ошибка к апстриму — как у тебя было
+            status = HttpStatus.BAD_GATEWAY;
         } else if (ex.getStatusCode().is5xxServerError()) {
             status = HttpStatus.BAD_GATEWAY;
         } else {

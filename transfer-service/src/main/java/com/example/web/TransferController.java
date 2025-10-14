@@ -46,7 +46,6 @@ public class TransferController {
     @ResponseStatus(HttpStatus.OK)
     public TransferResult transferExternal(@Valid @RequestBody TransferCommand r,
                                            JwtAuthenticationToken auth) {
-        // Тот же вызов: сервис сам поймёт own/external, проверив владельцев.
         UUID kid = UUID.fromString(auth.getToken().getClaimAsString("sub"));
         return service.transferOwn(
                 kid,

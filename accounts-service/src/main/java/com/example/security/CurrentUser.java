@@ -11,7 +11,6 @@ import java.util.UUID;
 public class CurrentUser {
 
     public UUID keycloakId(JwtAuthenticationToken auth) {
-        // В Keycloak обычно sub — UUID; берём его
         var jwt = auth.getToken();
         var sub = Optional.ofNullable(jwt.getClaimAsString("sub")).orElse(auth.getName());
         return UUID.fromString(sub);

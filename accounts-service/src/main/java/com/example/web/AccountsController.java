@@ -20,14 +20,12 @@ public class AccountsController {
     private final AccountAppService service;
     private final CurrentUser current;
 
-    /** Регистрация: создаём пользователя в Keycloak и профиль локально */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto register(@Valid @RequestBody RegistrationRequest req) {
         return service.register(req, null);
     }
 
-    /** Профиль текущего пользователя */
     @GetMapping("/me")
     public UserProfileDto me(JwtAuthenticationToken auth) {
         UUID kid = current.keycloakId(auth);

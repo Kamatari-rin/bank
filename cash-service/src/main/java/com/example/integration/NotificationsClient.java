@@ -30,7 +30,7 @@ public class NotificationsClient {
                 .uri("/api/notifications/internal/notify")
                 .headers(h -> h.setBearerAuth(token))
                 .bodyValue(Map.of(
-                        "userId", userId,   // <-- ключ исправлен
+                        "userId", userId,
                         "title", title,
                         "message", message
                 ))

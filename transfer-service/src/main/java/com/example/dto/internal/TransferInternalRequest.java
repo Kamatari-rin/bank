@@ -9,6 +9,6 @@ public record TransferInternalRequest(
         @NotNull UUID senderKeycloakId,
         @NotNull UUID fromAccountId,
         @NotNull UUID toAccountId,
-        @NotNull BigDecimal amountFrom, // сколько списать
-        @NotNull BigDecimal amountTo    // сколько зачислить (после конвертации)
+        @NotNull BigDecimal amountFrom,
+        @NotNull BigDecimal amountTo
 ) {}

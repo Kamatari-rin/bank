@@ -14,7 +14,6 @@ public class SecurityJwtDecoderConfig {
 
         NimbusReactiveJwtDecoder decoder = NimbusReactiveJwtDecoder.withJwkSetUri(jwks).build();
 
-        // Без проверки issuer: только подпись/время
         OAuth2TokenValidator<Jwt> validator = JwtValidators.createDefault();
         decoder.setJwtValidator(validator);
 
