@@ -109,7 +109,6 @@ subprojects {
         project(":transfer-service"),
         project(":blocker-service"),
         project(":notifications-service"),
-//        project(":exchange-service")
     )
     if (project in clientModules) {
         dependencies {
@@ -118,9 +117,24 @@ subprojects {
             implementation("org.springframework.boot:spring-boot-starter-security")
             implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
             implementation("org.springframework:spring-webflux")
-//            implementation("org.springframework.cloud:spring-cloud-starter-consul-discovery")
-//            implementation("org.springframework.cloud:spring-cloud-starter-consul-config")
             testImplementation("org.springframework.security:spring-security-test")
+        }
+    }
+
+    // === Consul Config
+    val consulModules = setOf(
+        project(":gateway"),
+        project(":accounts-service"),
+        project(":cash-service"),
+        project(":transfer-service"),
+        project(":exchange-service"),
+        project(":exchange-generator-service"),
+        project(":notifications-service"),
+        project(":blocker-service")
+    )
+    if (project in consulModules) {
+        dependencies {
+            implementation("org.springframework.cloud:spring-cloud-starter-consul-config")
         }
     }
 }
@@ -134,9 +148,6 @@ project(":gateway") {
         implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
         implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
         testImplementation("org.springframework.security:spring-security-test")
-        // Consul можно выключить конфигом/profiles
-//        implementation("org.springframework.cloud:spring-cloud-starter-consul-discovery")
-//        implementation("org.springframework.cloud:spring-cloud-starter-consul-config")
     }
 }
 
@@ -155,7 +166,6 @@ project(":db-migrations") {
         implementation("org.springframework.boot:spring-boot-starter-jdbc")
         implementation("org.liquibase:liquibase-core")
         runtimeOnly("org.postgresql:postgresql")
-//        implementation("org.springframework.cloud:spring-cloud-starter-consul-config")
         implementation("org.springframework.boot:spring-boot-starter-web")
     }
 }

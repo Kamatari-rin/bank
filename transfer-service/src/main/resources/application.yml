@@ -1,27 +1,3 @@
-server:
-  port: 8080
-
 spring:
   application:
     name: transfer-service
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
-      client:
-        provider:
-          keycloak:
-            token-uri: http://keycloak:8080/realms/bank/protocol/openid-connect/token
-            jwk-set-uri: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
-        registration:
-          transfer:
-            provider: keycloak
-            client-id: transfer-service
-            client-secret: HGp9JPlchvXfYcyqqvLeZTDZIJOwxFLL
-            authorization-grant-type: client_credentials
-
-gateway:
-  base-url: http://gateway:8080
-
-management.endpoints.web.exposure.include: health,info

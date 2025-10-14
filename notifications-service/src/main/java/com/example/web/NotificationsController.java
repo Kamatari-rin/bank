@@ -37,10 +37,8 @@ public class NotificationsController {
     }
 
     // ПУБЛИЧНЫЙ: читает уведомления текущего пользователя
-    // Берём subject из JWT надёжно через @AuthenticationPrincipal
     @GetMapping("/public/mine")
     public List<NotificationDto> mine(@AuthenticationPrincipal Jwt jwt) {
-        // sub = keycloak user id (UUID)
         UUID kcUserId = UUID.fromString(jwt.getSubject());
         return store.list(kcUserId);
     }

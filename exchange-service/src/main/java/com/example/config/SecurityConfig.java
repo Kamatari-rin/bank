@@ -28,9 +28,8 @@ import java.util.stream.Collectors;
 public class SecurityConfig {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
-    private static final String CLIENT_ID = "exchange-service"; // имя клиента в Keycloak
+    private static final String CLIENT_ID = "exchange-service";
 
-    /** Достаём client roles из resource_access[CLIENT_ID].roles */
     private static Collection<GrantedAuthority> extractClientRoles(Jwt jwt) {
         Object ra = jwt.getClaims().get("resource_access");
         if (!(ra instanceof Map<?, ?> map)) return List.of();
@@ -45,12 +44,10 @@ public class SecurityConfig {
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    /** Конвертер Jwt → Authentication с нашими ролями и fallback по azp */
     private static AbstractAuthenticationToken toAuth(Jwt jwt) {
         var auths = new ArrayList<GrantedAuthority>();
         auths.addAll(extractClientRoles(jwt));
 
-        // Fallback: если azp == exchange-generator, даём право как exchange-writer
         String azp = jwt.getClaimAsString("azp");
         if ("exchange-generator".equals(azp)) {
             auths.add(new SimpleGrantedAuthority("ROLE_exchange-writer"));
@@ -68,7 +65,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth -> oauth.jwt(j -> j.jwtAuthenticationConverter(SecurityConfig::toAuth)))
-                // Diagnostic filter — покажет, какие роли реально увидели
                 .addFilterAfter(new OncePerRequestFilter() {
                     @Override
                     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)

@@ -80,7 +80,7 @@ public class TransferAppServiceImpl implements TransferAppService {
         );
         var resp = accounts.transfer(req);
 
-// 5) уведомления
+        // 5) уведомления
         String typeOut = sameOwner ? "TRANSFER_OWN" : "TRANSFER_EXTERNAL";
         String titleOut = sameOwner ? "Перевод между своими счетами" : "Перевод отправлен";
         String msgOut = "Со счёта %s отправлено %s %s. Новый баланс: %s"

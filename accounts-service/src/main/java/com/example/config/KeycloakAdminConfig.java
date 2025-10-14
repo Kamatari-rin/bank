@@ -12,7 +12,6 @@ public class KeycloakAdminConfig {
 
     @Bean
     public WebClient keycloakAdminWebClient(KeycloakAdminProperties props) {
-        // небольшой буфер на случай «толстых» ответов
         var strategies = ExchangeStrategies.builder()
                 .codecs(c -> c.defaultCodecs().maxInMemorySize(512 * 1024))
                 .build();

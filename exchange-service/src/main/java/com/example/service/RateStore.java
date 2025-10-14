@@ -13,7 +13,7 @@ public class RateStore {
     private final ConcurrentHashMap<String, RateRow> rates = new ConcurrentHashMap<>();
 
     public RateStore() {
-        // дефолтные значения (можно поправить позже)
+        // дефолтные значения
         put(new RateRow("RUB", BigDecimal.ONE, BigDecimal.ONE));
         put(new RateRow("USD", new BigDecimal("89.50"), new BigDecimal("90.50")));
         put(new RateRow("CNY", new BigDecimal("11.80"), new BigDecimal("12.20")));

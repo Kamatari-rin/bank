@@ -25,8 +25,6 @@ public class ExchangeController {
         this.store = store;
     }
 
-    // ===== public endpoints =====
-
     @GetMapping("/rates")
     public Map<String, RateRow> rates() {
         return store.snapshot();
@@ -46,13 +44,11 @@ public class ExchangeController {
         var tr = rates.get(t);
         if (fr == null || tr == null) throw new IllegalArgumentException("Unsupported currency");
 
-        // переводим через базовую RUB: amount * sell(from) / buy(to)
         BigDecimal inRub = amount.multiply(fr.sell());
         BigDecimal out = inRub.divide(tr.buy(), 2, RoundingMode.HALF_UP);
         return new QuoteResponse(f, t, amount, out);
     }
 
-    // ===== internal endpoint (cc token) =====
 
     public record RatesUpdateRequest(@NotNull Map<String, @Valid RateRow> rates) {}
 
