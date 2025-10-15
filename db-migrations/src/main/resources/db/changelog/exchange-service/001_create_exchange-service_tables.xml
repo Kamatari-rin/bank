@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Создание таблицы exchange_rates -->
+    <changeSet id="20250711-1" author="admin">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists schemaName="exchange" tableName="exchange_rates"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE TABLE exchange.exchange_rates (
+                                                     id UUID PRIMARY KEY,
+                                                     currency VARCHAR(3) NOT NULL CHECK (currency IN ('USD', 'CNY')),
+                                                     buy_rate DECIMAL(10, 4) NOT NULL,
+                                                     sell_rate DECIMAL(10, 4) NOT NULL,
+                                                     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+        </sql>
+        <addUniqueConstraint schemaName="exchange"
+                             tableName="exchange_rates"
+                             columnNames="currency"
+                             constraintName="uq_exchange_currency"/>
+
+        <rollback>
+            DROP TABLE exchange.exchange_rates;
+        </rollback>
+    </changeSet>
+
+    <!-- Создание индекса для оптимизации -->
+    <changeSet id="20250711-2" author="admin">
+        <sql>
+            CREATE INDEX idx_exchange_rates_currency ON exchange.exchange_rates(currency);
+        </sql>
+        <rollback>
+            DROP INDEX exchange.idx_exchange_rates_currency;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

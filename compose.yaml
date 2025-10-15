@@ -1,0 +1,256 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 555666
+      POSTGRES_DB: bank
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    networks: [bank-network]
+
+  db-migrations:
+    build:
+      context: ./db-migrations
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bank
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 555666
+    networks: [bank-network]
+    restart: "no"
+
+  consul:
+    image: hashicorp/consul:1.19
+    command: agent -server -bootstrap -ui -client=0.0.0.0
+    ports:
+      - "8500:8500"
+    healthcheck:
+      test: [ "CMD", "consul", "info" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [ bank-network ]
+
+  consul-seed:
+    image: curlimages/curl:8.9.1
+    depends_on:
+      consul: { condition: service_healthy }
+    volumes:
+      - ./consul-seed:/seed:ro
+    entrypoint: [ "/bin/sh","/seed/seed.sh" ]
+    networks: [ bank-network ]
+    restart: "no"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    command: start-dev --import-realm --features=token-exchange
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: password
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/bank-realm.json:ro
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/realms/master" ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [ bank-network ]
+
+  gateway:
+    build:
+      context: ./gateway
+    environment:
+      SPRING_APPLICATION_NAME: gateway
+      SERVER_PORT: 8080
+      JAVA_OPTS: -Xmx768m -Xms512m
+      GATEWAY_CLIENT_SECRET: OxoKsibTRkfX9YFivysoOkaLjWh32Hwz
+      # === Consul config import ===
+      SPRING_CONFIG_IMPORT: "optional:consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: 8500
+      SPRING_CLOUD_CONSUL_CONFIG_FORMAT: yaml
+    ports:
+      - "8080:8080"
+    networks: [bank-network]
+
+  accounts-service:
+    build:
+      context: ./accounts-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-migrations:
+        condition: service_completed_successfully
+    environment:
+      SPRING_APPLICATION_NAME: accounts-service
+      JAVA_OPTS: -Xmx768m -Xms512m
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bank?currentSchema=accounts
+      SPRING_DATASOURCE_USERNAME: accounts_service_user
+      SPRING_DATASOURCE_PASSWORD: accounts_service_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      # === Keycloak Admin ===
+      KEYCLOAK_ADMIN_BASE_URL: http://keycloak:8080
+      KEYCLOAK_ADMIN_REALM: bank
+      KEYCLOAK_ADMIN_CLIENT_ID: accounts-service
+      KEYCLOAK_ADMIN_CLIENT_SECRET: esrmqgGyMr98YXxND7Gl0SBXoUTUrPsl
+      # === Consul config import ===
+      SPRING_CONFIG_IMPORT: "consul:"   # БЕЗ optional: чтобы упасть, если стартера нет
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: 8500
+      SPRING_CLOUD_CONSUL_CONFIG_FORMAT: yaml
+    networks: [bank-network]
+
+  cash-service:
+    build:
+      context: ./cash-service
+    depends_on:
+      gateway:
+        condition: service_started
+      accounts-service:
+        condition: service_started
+      consul:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    environment:
+      SPRING_APPLICATION_NAME: cash-service
+      SERVER_PORT: 8080
+
+      # === override client-credentials секретом/ID (регистрация cash-service)
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CASH_SERVICE_CLIENT_ID: cash-service
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CASH_SERVICE_CLIENT_SECRET: ATKfZYZkZAm7IS4IrJGIeuQoGNSuDItk
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CASH_SERVICE_AUTHORIZATION_GRANT_TYPE: client_credentials
+
+      # === provider override
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8080/realms/bank/protocol/openid-connect/token
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
+
+      # === внешние зависимости
+      ACCOUNTS_BASE_URL: http://gateway:8080
+
+      # === Consul
+      SPRING_CONFIG_IMPORT: "optional:consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: 8500
+      SPRING_CLOUD_CONSUL_CONFIG_FORMAT: yaml
+    networks: [ bank-network ]
+
+  exchange-service:
+    build:
+      context: ./exchange-service
+    depends_on:
+      consul: { condition: service_started }
+      keycloak: { condition: service_started }
+    environment:
+      SPRING_APPLICATION_NAME: exchange-service
+      SERVER_PORT: 8080
+
+      # === Consul config import ===
+      SPRING_CONFIG_IMPORT: "optional:consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: 8500
+      SPRING_CLOUD_CONSUL_CONFIG_FORMAT: yaml
+    networks: [ bank-network ]
+
+  exchange-generator-service:
+    build:
+      context: ./exchange-generator-service
+    depends_on:
+      consul: { condition: service_started }
+      keycloak: { condition: service_started }
+      gateway: { condition: service_started }
+    environment:
+      SPRING_APPLICATION_NAME: exchange-generator-service
+      SERVER_PORT: 8080
+
+      # === Consul config import ===
+      SPRING_CONFIG_IMPORT: "optional:consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: 8500
+      SPRING_CLOUD_CONSUL_CONFIG_FORMAT: yaml
+
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GENERATOR_CLIENT_SECRET: vhrBAR45NLul2OKWXHnjH8wXOQMMfOlP
+      EXCHANGE_BASE_URL: http://gateway:8080
+    networks: [ bank-network ]
+
+  transfer-service:
+    build:
+      context: ./transfer-service
+    depends_on:
+      consul: { condition: service_started }
+      keycloak: { condition: service_started }
+      gateway: { condition: service_started }
+      accounts-service: { condition: service_started }
+      exchange-service: { condition: service_started }
+    environment:
+      SPRING_APPLICATION_NAME: transfer-service
+      SERVER_PORT: 8080
+
+      # === Consul config import ===
+      SPRING_CONFIG_IMPORT: "optional:consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: 8500
+      SPRING_CLOUD_CONSUL_CONFIG_FORMAT: yaml
+
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_TRANSFER_CLIENT_SECRET: HGp9JPlchvXfYcyqqvLeZTDZIJOwxFLL
+
+      GATEWAY_BASE_URL: http://gateway:8080
+    networks: [ bank-network ]
+
+
+  blocker-service:
+    build:
+      context: ./blocker-service
+    depends_on:
+      consul:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    environment:
+      SPRING_APPLICATION_NAME: blocker-service
+      SERVER_PORT: 8080
+
+      # === Consul config import ===
+      SPRING_CONFIG_IMPORT: "optional:consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: 8500
+      SPRING_CLOUD_CONSUL_CONFIG_FORMAT: yaml
+    networks: [ bank-network ]
+
+  notifications-service:
+    build:
+      context: ./notifications-service
+    depends_on:
+      consul: { condition: service_started }
+      keycloak: { condition: service_started }
+    environment:
+      SPRING_APPLICATION_NAME: notifications-service
+      SERVER_PORT: 8080
+
+      # === Consul config import ===
+      SPRING_CONFIG_IMPORT: "optional:consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: 8500
+      SPRING_CLOUD_CONSUL_CONFIG_FORMAT: yaml
+    networks: [ bank-network ]
+
+volumes:
+  postgres_data:
+
+networks:
+  bank-network:
+    driver: bridge

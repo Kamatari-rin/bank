@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Создание таблицы blocked_operations -->
+    <changeSet id="20250711-1" author="admin">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists schemaName="blocker" tableName="blocked_operations"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE TABLE blocker.blocked_operations (
+                                                        id UUID PRIMARY KEY,
+                                                        transaction_id UUID NOT NULL,
+                                                        service_name VARCHAR(50) NOT NULL CHECK (service_name IN ('CASH', 'TRANSFER')),
+                                                        reason VARCHAR(255),
+                                                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+        </sql>
+        <rollback>
+            DROP TABLE blocker.blocked_operations;
+        </rollback>
+    </changeSet>
+
+    <!-- Создание индекса для оптимизации -->
+    <changeSet id="20250711-2" author="admin">
+        <sql>
+            CREATE INDEX idx_blocked_operations_transaction_id ON blocker.blocked_operations(transaction_id);
+        </sql>
+        <rollback>
+            DROP INDEX blocker.idx_blocked_operations_transaction_id;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,11 @@
+rootProject.name = "bank"
+include("gateway")
+include("accounts-service")
+include("cash-service")
+include("transfer-service")
+include("blocker-service")
+include("exchange-service")
+include("notifications-service")
+include("common-lib")
+include("exchange-generator-service")
+include("db-migrations")

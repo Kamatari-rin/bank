@@ -1,0 +1,85 @@
+spring:
+  cloud:
+    gateway:
+      default-filters:
+        - RemoveRequestHeader=X-User-Id
+        - RemoveRequestHeader=X-User-Name
+        - TokenRelay
+
+      routes:
+        - id: blocker
+          uri: http://blocker-service:8080
+          predicates:
+            - Path=/api/blocker/**
+          filters:
+            - RewritePath=/api/blocker/(?<segment>.*),/api/${segment}
+
+        - id: notifications-internal
+          uri: http://notifications-service:8080
+          predicates:
+            - Path=/api/notifications/internal/**
+          filters:
+            - RewritePath=/api/notifications/internal/(?<segment>.*),/api/internal/${segment}
+
+        - id: notifications-public
+          uri: http://notifications-service:8080
+          predicates:
+            - Path=/api/notifications/public/**
+          filters:
+            - RewritePath=/api/notifications/public/(?<segment>.*),/api/public/${segment}
+
+        - id: cash
+          uri: http://cash-service:8080
+          predicates:
+            - Path=/api/cash/**
+          filters:
+            - RewritePath=/api/cash/(?<segment>.*),/api/${segment}
+
+        - id: accounts-internal
+          uri: http://accounts-service:8080
+          predicates:
+            - Path=/api/accounts/internal/**
+          filters:
+            - RewritePath=/api/accounts/internal/(?<segment>.*),/api/internal/${segment}
+
+        - id: accounts
+          uri: http://accounts-service:8080
+          predicates:
+            - Path=/api/accounts/**
+          filters:
+            - RewritePath=/api/accounts/(?<segment>.*),/api/${segment}
+
+        - id: transfer
+          uri: http://transfer-service:8080
+          predicates:
+            - Path=/api/transfer/**
+          filters:
+            - RewritePath=/api/transfer/(?<segment>.*),/api/${segment}
+
+        - id: exchange
+          uri: http://exchange-service:8080
+          predicates:
+            - Path=/api/exchange/**
+          filters:
+            - RewritePath=/api/exchange/(?<segment>.*),/api/${segment}
+
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          "[/**]":
+            allowedOrigins:
+              - "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: ["*"]
+            allowCredentials: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

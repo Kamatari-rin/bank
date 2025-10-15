@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleHome" value="" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/accounts-service" />
+            <option value="$PROJECT_DIR$/blocker-service" />
+            <option value="$PROJECT_DIR$/cash-service" />
+            <option value="$PROJECT_DIR$/common-lib" />
+            <option value="$PROJECT_DIR$/db-migrations" />
+            <option value="$PROJECT_DIR$/exchange-generator-service" />
+            <option value="$PROJECT_DIR$/exchange-service" />
+            <option value="$PROJECT_DIR$/gateway" />
+            <option value="$PROJECT_DIR$/notifications-service" />
+            <option value="$PROJECT_DIR$/transfer-service" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: accounts-service
+logging:
+  level:
+    org.springframework.cloud.consul: INFO
+    org.springframework.cloud.consul.config: DEBUG

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Создание таблицы transfers -->
+    <changeSet id="20250711-1" author="admin">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists schemaName="transfer" tableName="transfers"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE TABLE transfer.transfers (
+                                                id UUID PRIMARY KEY,
+                                                from_account_id UUID NOT NULL,
+                                                to_account_id UUID NOT NULL,
+                                                amount DECIMAL(15, 2) NOT NULL,
+                                                currency VARCHAR(3) NOT NULL CHECK (currency IN ('RUB', 'USD', 'CNY')),
+                                                converted_amount DECIMAL(15, 2),
+                                                target_currency VARCHAR(3) CHECK (target_currency IN ('RUB', 'USD', 'CNY')),
+                                                status VARCHAR(20) NOT NULL CHECK (status IN ('PENDING', 'COMPLETED', 'FAILED')),
+                                                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                                updated_at TIMESTAMP
+            );
+        </sql>
+        <rollback>
+            DROP TABLE transfer.transfers;
+        </rollback>
+    </changeSet>
+
+    <!-- Создание индексов для оптимизации -->
+    <changeSet id="20250711-2" author="admin">
+        <sql>
+            CREATE INDEX idx_transfers_from_account_id ON transfer.transfers(from_account_id);
+            CREATE INDEX idx_transfers_to_account_id ON transfer.transfers(to_account_id);
+        </sql>
+        <rollback>
+            DROP INDEX transfer.idx_transfers_from_account_id;
+            DROP INDEX transfer.idx_transfers_to_account_id;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

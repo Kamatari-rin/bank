@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Создание таблицы notifications -->
+    <changeSet id="20250711-1" author="admin">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists schemaName="notifications" tableName="notifications"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE TABLE notifications.notifications (
+                                                         id UUID PRIMARY KEY,
+                                                         user_id UUID NOT NULL,
+                                                         message TEXT NOT NULL,
+                                                         notification_type VARCHAR(20) NOT NULL CHECK (notification_type IN ('EMAIL', 'ALERT')),
+                                                         status VARCHAR(20) NOT NULL CHECK (status IN ('PENDING', 'SENT', 'FAILED')),
+                                                         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+        </sql>
+        <rollback>
+            DROP TABLE notifications.notifications;
+        </rollback>
+    </changeSet>
+
+    <!-- Создание индекса для оптимизации -->
+    <changeSet id="20250711-2" author="admin">
+        <sql>
+            CREATE INDEX idx_notifications_user_id ON notifications.notifications(user_id);
+        </sql>
+        <rollback>
+            DROP INDEX notifications.idx_notifications_user_id;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
