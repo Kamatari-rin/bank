@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+
+  application:
+    name: cash-service
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs
+      client:
+        provider:
+          keycloak:
+            token-uri: http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/token
+            jwk-set-uri: http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs
+        registration:
+          cash-service:
+            provider: keycloak
+            client-id: cash-service
+            client-secret: changeme
+            authorization-grant-type: client_credentials
+
+accounts:
+  base-url: http://gateway:8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

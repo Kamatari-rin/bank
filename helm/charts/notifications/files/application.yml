@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: notifications-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs
+
+logging:
+  level:
+    org.springframework.security: DEBUG

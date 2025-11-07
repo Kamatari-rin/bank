@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Release.Name }}-notifications-smoke"
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: curl
+      image: curlimages/curl:8.9.1
+      args:
+        - -fsSL
+        - --retry
+        - "10"
+        - --retry-connrefused
+        - "http://notifications.{{ .Release.Namespace }}.svc:8080/actuator/health"

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: accounts
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector: { app: accounts }
+  ports:
+    - name: http
+      port: 8080
+      targetPort: {{ .Values.service.port }}

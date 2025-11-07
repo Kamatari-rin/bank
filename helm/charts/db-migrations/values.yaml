@@ -1,0 +1,14 @@
+image:
+  repository: "db-migrations"
+  tag: "dev"
+  pullPolicy: IfNotPresent
+
+postgres:
+  host: "postgres"
+  port: 5432
+
+resources: {}
+
+# cколько раз Job может ретраиться
+backoffLimit: 1
+activeDeadlineSeconds: 600
