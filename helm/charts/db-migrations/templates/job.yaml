@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrations
+  namespace: {{ .Release.Namespace }}
+spec:
+  backoffLimit: {{ .Values.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.activeDeadlineSeconds }}
+  template:
+    metadata:
+      labels:
+        app: db-migrations
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-postgres
+          image: postgres:16
+          command: ["bash","-lc"]
+          args:
+            - |
+              echo "Waiting for Postgres {{ .Values.postgres.host }}:{{ .Values.postgres.port }} ..."
+              for i in {1..60}; do
+                pg_isready -h {{ .Values.postgres.host }} -p {{ .Values.postgres.port }} && exit 0
+                sleep 2
+              done
+              echo "Postgres not ready"; exit 1
+      containers:
+        - name: liquibase-runner
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: SPRING_MAIN_WEB_APPLICATION_TYPE
+              value: "none"
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/config/"
+            - name: SPRING_CLOUD_CONSUL_CONFIG_ENABLED
+              value: "false"
+            - name: SPRING_CLOUD_CONSUL_CONFIG_IMPORT_CHECK_ENABLED
+              value: "false"
+          volumeMounts:
+            - name: app-config
+              mountPath: /config
+              readOnly: true
+          resources:
+{{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: app-config
+          configMap:
+            name: db-migrations-config
+            items:
+              - key: application.yml
+                path: application.yml

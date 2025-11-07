@@ -1,17 +1,8 @@
 spring:
+  main:
+    web-application-type: none
   application:
     name: db-migrations
-  config:
-    import: optional:consul:consul:8500 # Исправлено: указываем хост и порт Consul
-  cloud:
-    consul:
-      host: consul # Имя сервиса Consul в Docker Compose
-      port: 8500
-      config:
-        enabled: true
-        prefix: config
-        default-context: db-migrations
-        profile-separator: '::'
 
 db:
   migrations:
@@ -47,8 +38,6 @@ db:
         password: notifications_service_password
         changelog: classpath:db/changelog/notifications-service/changelog-notifications-service.xml
 
-info:
-  app:
-    name: ${spring.application.name}
-    description: Database migrations module
-    version: 1.0.0
+logging:
+  level:
+    liquibase: info

@@ -4,10 +4,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.ApplicationContext;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-public class DbMigrationsApplication implements CommandLineRunner {
+@ConfigurationPropertiesScan(basePackages = "com.example")
+public class DbMigrationsApplication{
 
     private final ApplicationContext context;
 
@@ -19,8 +21,4 @@ public class DbMigrationsApplication implements CommandLineRunner {
         SpringApplication.run(DbMigrationsApplication.class, args);
     }
 
-    @Override
-    public void run(String... args) {
-        SpringApplication.exit(context, () -> 0);
-    }
 }

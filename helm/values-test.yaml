@@ -1,0 +1,72 @@
+# TEST: интеграционное тестирование
+keycloak:
+  enabled: true
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - keycloak-test.local
+
+postgres:
+  enabled: true
+  storage: "10Gi"
+
+accounts:
+  enabled: true
+  image:
+    repository: accounts-service
+    tag: test
+
+notifications:
+  enabled: true
+  image:
+    repository: notifications-service
+    tag: test
+
+blocker:
+  enabled: true
+  image:
+    repository: blocker-service
+    tag: test
+
+cash:
+  enabled: true
+  image:
+    repository: cash-service
+    tag: test
+
+transfer:
+  enabled: true
+  image:
+    repository: transfer-service
+    tag: test
+
+exchange:
+  enabled: true
+  image:
+    repository: exchange-service
+    tag: test
+
+exchangeGenerator:
+  enabled: true
+  image:
+    repository: exchange-generator-service
+    tag: test
+
+edge:
+  enabled: true
+  ingress:
+    className: nginx
+    hosts:
+      - bank-test.local
+
+replicaCount: 1
+global:
+  image:
+    pullPolicy: IfNotPresent
+  env:
+    SPRING_PROFILES_ACTIVE: "k8s"
+    JAVA_OPTS: "-Xms256m -Xmx512m"
+  resources:
+    requests: { cpu: "200m", memory: "384Mi" }
+    limits:   { cpu: "800m", memory: "768Mi" }

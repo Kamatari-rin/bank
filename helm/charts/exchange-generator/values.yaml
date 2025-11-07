@@ -1,0 +1,25 @@
+image:
+  repository: "exchange-generator-service"
+  tag: "dev"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8080
+
+resources: {}
+
+env:
+  SPRING_APPLICATION_NAME: "exchange-generator-service"
+  SPRING_PROFILES_ACTIVE: "k8s"
+  JAVA_OPTS: "-Xms128m -Xmx256m"
+
+  EXCHANGE_BASE_URL: "http://exchange.bank-dev.svc:8080"
+
+  OAUTH2_TOKEN_URI: "http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/token"
+  OAUTH2_CLIENT_ID: "exchange-generator-service"
+
+secrets:
+  OAUTH2_CLIENT_SECRET: "vhrBAR45NLul2OKWXHnjH8wXOQMMfOlP"
+
+jwk:
+  uri: "http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs"

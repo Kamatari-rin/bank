@@ -1,0 +1,34 @@
+{{- if .Values.ingress.enabled }}
+{{- range $i, $r := .Values.routes }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bank-edge-{{ $i }}
+  namespace: {{ $.Release.Namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: "{{ $r.rewriteTarget }}"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    {{- if $.Values.cors.enabled }}
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "{{ join "," $.Values.cors.allowedOrigins }}"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "{{ $.Values.cors.allowedMethods }}"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "{{ $.Values.cors.allowedHeaders }}"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "{{ $.Values.cors.allowCredentials }}"
+    {{- end }}
+spec:
+  ingressClassName: {{ $.Values.ingress.className | quote }}
+  rules:
+    - host: {{ $.Values.ingress.host }}
+      http:
+        paths:
+          - path: {{ $r.path }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ $r.service }}
+                port:
+                  number: {{ $r.port }}
+---
+{{- end }}
+{{- end }}

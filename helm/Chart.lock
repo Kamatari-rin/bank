@@ -1,0 +1,12 @@
+dependencies:
+- name: keycloak
+  repository: file://charts/keycloak
+  version: 0.1.0
+- name: postgres
+  repository: file://charts/postgres
+  version: 0.1.0
+- name: accounts
+  repository: file://charts/accounts
+  version: 0.1.0
+digest: sha256:35942a2ad155b3ec34045ee771448830cfd303db7c089e8ccb59312607e2c831
+generated: "2025-10-31T23:49:21.7142829+05:00"

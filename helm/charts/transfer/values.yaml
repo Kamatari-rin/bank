@@ -1,0 +1,27 @@
+image:
+  repository: "transfer-service"
+  tag: "dev"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8080
+
+resources: {}
+
+env:
+  SPRING_APPLICATION_NAME: "transfer-service"
+  SPRING_PROFILES_ACTIVE: "k8s"
+  JAVA_OPTS: "-Xms128m -Xmx256m"
+
+  # Внутрисетевые DNS сервисов (НЕ через Spring Cloud Gateway)
+  ACCOUNTS_BASE_URL: "http://accounts.bank-dev.svc:8080"
+  EXCHANGE_BASE_URL:  "http://exchange.bank-dev.svc:8080"
+  NOTIFICATIONS_BASE_URL: "http://notifications.bank-dev.svc:8080"
+
+  # OAuth2 (client-credentials)
+  OAUTH2_TOKEN_URI: "http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/token"
+  OAUTH2_JWK_SET_URI: "http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs"
+  OAUTH2_CLIENT_ID: "transfer-service"
+
+secrets:
+  OAUTH2_CLIENT_SECRET: "HGp9JPlchvXfYcyqqvLeZTDZIJOwxFLL"

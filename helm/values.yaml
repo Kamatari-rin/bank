@@ -1,0 +1,57 @@
+global:
+  image:
+    registry: "local"
+    tag: "dev"
+    pullPolicy: IfNotPresent
+  env:
+    JAVA_OPTS: "-Xms256m -Xmx512m"
+    SPRING_PROFILES_ACTIVE: "k8s"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+namespace: dev
+
+ingress:
+  enabled: true
+  className: nginx
+  host: bank.local
+  tls: false
+
+postgres:
+  image: "postgres:16"
+  user: "postgres"
+  password: "555666"
+  db: "bank"
+  storage: "5Gi"
+
+# Порты и имена образов микросервисов
+services:
+  accounts:
+    image: "accounts-service"
+    port: 8080
+  cash:
+    image: "cash-service"
+    port: 8080
+  transfer:
+    image: "transfer-service"
+    port: 8080
+  exchange:
+    image: "exchange-service"
+    port: 8080
+  exchangeGenerator:
+    image: "exchange-generator-service"
+    port: 8080
+  blocker:
+    image: "blocker-service"
+    port: 8080
+  notifications:
+    image: "notifications-service"
+    port: 8080
+  gateway:
+    image: "gateway"
+    port: 8080

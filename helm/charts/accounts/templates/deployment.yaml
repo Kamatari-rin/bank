@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounts
+  namespace: {{ .Release.Namespace }}
+  labels: { app: accounts }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: accounts } }
+  template:
+    metadata:
+      labels: { app: accounts }
+    spec:
+      containers:
+        - name: accounts
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/config/"
+            - name: SPRING_APPLICATION_NAME
+              value: "{{ .Values.env.SPRING_APPLICATION_NAME }}"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "{{ .Values.env.SPRING_PROFILES_ACTIVE }}"
+            - name: JAVA_OPTS
+              value: "{{ .Values.env.JAVA_OPTS }}"
+            - name: SPRING_DATASOURCE_URL
+              value: "{{ .Values.env.SPRING_DATASOURCE_URL }}"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "{{ .Values.env.SPRING_DATASOURCE_USERNAME }}"
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "{{ .Values.env.SPRING_JPA_HIBERNATE_DDL_AUTO }}"
+            - name: KEYCLOAK_ADMIN_BASE_URL
+              value: "{{ .Values.env.KEYCLOAK_ADMIN_BASE_URL }}"
+            - name: KEYCLOAK_ADMIN_REALM
+              value: "{{ .Values.env.KEYCLOAK_ADMIN_REALM }}"
+            - name: KEYCLOAK_ADMIN_CLIENT_ID
+              value: "{{ .Values.env.KEYCLOAK_ADMIN_CLIENT_ID }}"
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom: { secretKeyRef: { name: accounts-secrets, key: SPRING_DATASOURCE_PASSWORD } }
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: accounts-secrets, key: KEYCLOAK_ADMIN_CLIENT_SECRET } }
+            - name: SPRING_CLOUD_CONSUL_CONFIG_ENABLED
+              value: "false"
+            - name: SPRING_CLOUD_CONSUL_CONFIG_IMPORT_CHECK_ENABLED
+              value: "false"
+          volumeMounts:
+            - name: app-config
+              mountPath: /config
+              readOnly: true
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8080 }
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+      volumes:
+        - name: app-config
+          configMap:
+            name: accounts-app-config
+            items:
+              - key: application.yml
+                path: application.yml

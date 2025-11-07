@@ -1,0 +1,73 @@
+# DEV: локальная разработка
+keycloak:
+  enabled: true
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - keycloak.local
+
+postgres:
+  enabled: true
+  storage: "5Gi"
+
+accounts:
+  enabled: true
+  image:
+    repository: accounts-service
+    tag: dev
+
+notifications:
+  enabled: true
+  image:
+    repository: notifications-service
+    tag: dev
+
+blocker:
+  enabled: true
+  image:
+    repository: blocker-service
+    tag: dev
+
+cash:
+  enabled: true
+  image:
+    repository: cash-service
+    tag: dev
+
+transfer:
+  enabled: true
+  image:
+    repository: transfer-service
+    tag: dev
+
+exchange:
+  enabled: true
+  image:
+    repository: exchange-service
+    tag: dev
+
+exchangeGenerator:
+  enabled: true
+  image:
+    repository: exchange-generator-service
+    tag: dev
+
+edge:
+  enabled: true
+  ingress:
+    className: nginx
+    hosts:
+      - bank.local
+
+# Общее для dev
+replicaCount: 1
+global:
+  image:
+    pullPolicy: IfNotPresent
+  env:
+    SPRING_PROFILES_ACTIVE: "k8s"
+    JAVA_OPTS: "-Xms256m -Xmx512m"
+  resources:
+    requests: { cpu: "100m", memory: "256Mi" }
+    limits:   { cpu: "500m", memory: "512Mi" }

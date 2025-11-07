@@ -62,7 +62,7 @@ services:
     ports:
       - "8082:8080"
     volumes:
-      - ./realm-export.json:/opt/keycloak/data/import/bank-realm.json:ro
+      - ./realm-export2.json:/opt/keycloak/data/import/bank-realm.json:ro
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/realms/master" ]
       interval: 10s

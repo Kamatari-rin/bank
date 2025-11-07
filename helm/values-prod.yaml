@@ -1,0 +1,81 @@
+# PROD: "боевое" окружение (локально можно эмулировать)
+keycloak:
+  enabled: true
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - keycloak.example.com
+    # tls: true  # сертификаты — включить и добавить секрет
+
+postgres:
+  enabled: true
+  storage: "20Gi"
+
+accounts:
+  enabled: true
+  image:
+    repository: accounts-service
+    tag: prod
+  replicaCount: 2
+
+notifications:
+  enabled: true
+  image:
+    repository: notifications-service
+    tag: prod
+  replicaCount: 2
+
+blocker:
+  enabled: true
+  image:
+    repository: blocker-service
+    tag: prod
+  replicaCount: 2
+
+cash:
+  enabled: true
+  image:
+    repository: cash-service
+    tag: prod
+  replicaCount: 2
+
+transfer:
+  enabled: true
+  image:
+    repository: transfer-service
+    tag: prod
+  replicaCount: 2
+
+exchange:
+  enabled: true
+  image:
+    repository: exchange-service
+    tag: prod
+  replicaCount: 2
+
+exchangeGenerator:
+  enabled: true
+  image:
+    repository: exchange-generator-service
+    tag: prod
+  replicaCount: 1  # генератор можно оставить в 1 экземпляре
+
+edge:
+  enabled: true
+  ingress:
+    className: nginx
+    hosts:
+      - bank.example.com
+    # tls: true
+
+# Глобальные настройки для prod
+global:
+  image:
+    pullPolicy: IfNotPresent
+  env:
+    SPRING_PROFILES_ACTIVE: "k8s"
+    JAVA_OPTS: "-Xms512m -Xmx768m"
+  resources:
+    requests: { cpu: "300m", memory: "512Mi" }
+    limits:   { cpu: "1000m", memory: "1024Mi" }

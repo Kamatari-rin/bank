@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: blocker-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs
+
+blocker:
+  random-block-percent: 3        # вероятность блокировки, %
+  night-start-hour: 0            # 0..23 (UTC)
+  night-end-hour: 6
+  night-amount-threshold: 50000  # всё что >= — подозрительно ночью
+  max-amount: 1000000            # защитный порог
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    org.springframework.security: INFO

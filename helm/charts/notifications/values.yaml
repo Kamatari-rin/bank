@@ -1,0 +1,17 @@
+image:
+  repository: "notifications-service"
+  tag: "dev"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8080
+
+resources: {}
+
+env:
+  SPRING_APPLICATION_NAME: "notifications-service"
+  SPRING_PROFILES_ACTIVE: "k8s"
+  JAVA_OPTS: "-Xms128m -Xmx256m"
+
+  # если сервис валидирует JWT, укажем jwk-set-uri на кейклок
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs"
