@@ -17,6 +17,9 @@ env:
   ACCOUNTS_BASE_URL: "http://accounts.bank-dev.svc:8080"
   NOTIFICATIONS_BASE_URL: "http://notifications.bank-dev.svc:8080"
 
+  KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"
+  KAFKA_TOPIC_NOTIFICATIONS: "bank.notifications"
+
   # OAuth2 client-credentials для вызова других сервисов
   OAUTH2_TOKEN_URI: "http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/token"
   OAUTH2_JWK_SET_URI: "http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs"

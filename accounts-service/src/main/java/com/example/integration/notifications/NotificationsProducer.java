@@ -1,39 +1,38 @@
-package com.example.integration;
+package com.example.integration.notifications;
 
 import com.example.dto.NotifyCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-public class NotificationsClient {
+public class NotificationsProducer {
 
     private final KafkaTemplate<String, NotifyCommand> kafkaTemplate;
 
     @Value("${app.kafka.notifications-topic}")
     private String topic;
 
-    public void notify(UUID userId, String title, String message) {
-        NotifyCommand cmd = new NotifyCommand(userId, title, message);
-
+    public void send(UUID userKeycloakId, String title, String message) {
+        NotifyCommand cmd = new NotifyCommand(userKeycloakId, title, message);
         kafkaTemplate
-                .send(topic, userId.toString(), cmd)
+                .send(topic, userKeycloakId.toString(), cmd)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
-                        log.warn("Failed to send notification to Kafka userId={} title={} error={}",
-                                userId, title, ex.toString(), ex);
+                        log.warn("Failed to send notification to Kafka userId={} title={}: {}",
+                                userKeycloakId, title, ex.getMessage(), ex);
                     } else {
                         log.debug("Notification sent to Kafka topic={} partition={} offset={} userId={} title={}",
                                 result.getRecordMetadata().topic(),
                                 result.getRecordMetadata().partition(),
                                 result.getRecordMetadata().offset(),
-                                userId, title);
+                                userKeycloakId, title);
                     }
                 });
     }

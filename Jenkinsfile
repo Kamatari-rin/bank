@@ -12,6 +12,7 @@ pipeline {
     booleanParam(name: 'DEPLOY', defaultValue: true, description: 'Деплоить в Kubernetes')
     booleanParam(name: 'RUN_HELM_TESTS', defaultValue: true, description: 'Запустить helm test после деплоя')
     string(name: 'IMAGE_TAG', defaultValue: '', description: 'Тег образов (по умолчанию короткий git SHA)')
+    booleanParam(name: 'DEPLOY_KAFKA', defaultValue: false, description: 'Деплоить Kafka вместе с приложением')
   }
 
   environment {
@@ -89,6 +90,16 @@ pipeline {
           helm lint helm
         """
       }
+    }
+
+    stage('Helm upgrade/install Kafka') {
+          when { expression { return params.DEPLOY_KAFKA } }
+          steps {
+            sh """
+              helm upgrade --install bank-kafka ./helm/charts/kafka \\
+                -n ${NAMESPACE} --create-namespace
+            """
+          }
     }
 
     stage('Helm upgrade/install') {

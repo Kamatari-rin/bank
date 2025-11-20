@@ -35,6 +35,7 @@ public class AccountAppServiceImpl implements AccountAppService {
     private final BankAccountMapper accountMapper;
     private final UserProfileMapper profileMapper;
     private final KeycloakAdminClient kc;
+    private final com.example.integration.notifications.NotificationsProducer notifications;
 
     @Override
     public UserDto register(RegistrationRequest r, UUID ignored) {
@@ -54,6 +55,13 @@ public class AccountAppServiceImpl implements AccountAppService {
 
         UserDto dto = createLocalProfile(keycloakId, r.withEmail(email));
         log.info("register: local profile saved userId={} kcId={} email={}", dto.id(), dto.keycloakId(), dto.email());
+
+        notifications.send(
+                dto.keycloakId(),
+                "Welcome to Bank",
+                "Your account has been successfully registered."
+        );
+
         return dto;
     }
 
@@ -95,6 +103,13 @@ public class AccountAppServiceImpl implements AccountAppService {
         user.setBirthDate(r.birthDate());
         var dto = userMapper.toDto(user);
         log.info("updateUser: updated kcId={} email={}", keycloakId, email);
+
+        notifications.send(
+                keycloakId,
+                "Profile updated",
+                "Your profile information has been updated."
+        );
+
         return dto;
     }
 
@@ -125,6 +140,14 @@ public class AccountAppServiceImpl implements AccountAppService {
         var saved = accounts.save(entity);
         log.info("createAccount: kcId={} userId={} accountId={} currency={}",
                 keycloakId, user.getId(), saved.getId(), saved.getCurrency());
+
+        notifications.send(
+                keycloakId,
+                "Account created",
+                "New account in currency %s has been created."
+                        .formatted(saved.getCurrency().name())
+        );
+
         return accountMapper.toDto(saved);
     }
 
@@ -142,5 +165,12 @@ public class AccountAppServiceImpl implements AccountAppService {
         }
         accounts.delete(acc);
         log.info("deleteAccount: deleted kcId={} accountId={}", keycloakId, accountId);
+
+        notifications.send(
+                keycloakId,
+                "Account deleted",
+                "Your account %s has been deleted."
+                        .formatted(accountId)
+        );
     }
 }

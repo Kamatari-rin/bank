@@ -9,7 +9,20 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      auto-offset-reset: latest
+      properties:
+        spring.json.trusted.packages: "com.example.dto"
+
+app:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    notifications-topic: ${KAFKA_TOPIC_NOTIFICATIONS:bank.notifications}
+    notifications-group-id: ${KAFKA_NOTIFICATIONS_GROUP:notifications-service}
 
 logging:
   level:
     org.springframework.security: DEBUG
+    org.springframework.kafka: INFO

@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-create-topics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kafka
+spec:
+  template:
+    metadata:
+      labels:
+        app: kafka-create-topics
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: create-topics
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Waiting for Kafka to be ready..."
+              # Простейший wait
+              for i in {1..30}; do
+                nc -z kafka {{ .Values.service.port }} && break
+                echo "Kafka not ready yet, sleeping..."
+                sleep 5
+              done
+              {{- range .Values.topics }}
+              echo "Creating topic {{ .name }} ..."
+              kafka-topics.sh \
+                --bootstrap-server kafka:{{ $.Values.service.port }} \
+                --create \
+                --if-not-exists \
+                --topic {{ .name }} \
+                --partitions {{ .partitions }} \
+                --replication-factor {{ .replicationFactor }}
+              {{- end }}
+              echo "All topics created."

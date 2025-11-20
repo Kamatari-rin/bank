@@ -51,10 +51,4 @@ public class ExchangeController {
 
 
     public record RatesUpdateRequest(@NotNull Map<String, @Valid RateRow> rates) {}
-
-    @PostMapping("/internal/rates")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateRates(@Valid @RequestBody RatesUpdateRequest req) {
-        req.rates().values().forEach(store::put);
-    }
 }

@@ -26,6 +26,10 @@ spec:
               value: "{{ .Values.env.SPRING_PROFILES_ACTIVE }}"
             - name: JAVA_OPTS
               value: "{{ .Values.env.JAVA_OPTS }}"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.env.KAFKA_BOOTSTRAP_SERVERS }}"
+            - name: KAFKA_TOPIC_NOTIFICATIONS
+              value: "{{ .Values.env.KAFKA_TOPIC_NOTIFICATIONS }}"
             - name: SPRING_DATASOURCE_URL
               value: "{{ .Values.env.SPRING_DATASOURCE_URL }}"
             - name: SPRING_DATASOURCE_USERNAME

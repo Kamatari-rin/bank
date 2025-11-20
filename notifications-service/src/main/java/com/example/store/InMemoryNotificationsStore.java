@@ -29,7 +29,7 @@ public class InMemoryNotificationsStore {
         var q = data.get(userId);
         if (q == null) return List.of();
         synchronized (q) {
-            return new ArrayList<>(q); // копия в актуальном порядке (новые сверху)
+            return new ArrayList<>(q);
         }
     }
 }
