@@ -1,0 +1,11 @@
+image: "postgres:16"
+
+user: "postgres"
+password: "555666"
+db: "bank"
+
+port: 5432
+storage: "5Gi"
+storageClassName: ""   # оставь пустым для дефолтного SC minikube
+
+resources: {}

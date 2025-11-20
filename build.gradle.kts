@@ -98,6 +98,7 @@ subprojects {
             implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
             implementation("org.springframework.boot:spring-boot-starter-validation")
             testImplementation("org.springframework.security:spring-security-test")
+            implementation("org.springframework.boot:spring-boot-starter-actuator")
         }
     }
 
@@ -121,22 +122,22 @@ subprojects {
         }
     }
 
-    // === Consul Config
-    val consulModules = setOf(
-        project(":gateway"),
-        project(":accounts-service"),
-        project(":cash-service"),
-        project(":transfer-service"),
-        project(":exchange-service"),
-        project(":exchange-generator-service"),
-        project(":notifications-service"),
-        project(":blocker-service")
-    )
-    if (project in consulModules) {
-        dependencies {
-            implementation("org.springframework.cloud:spring-cloud-starter-consul-config")
-        }
-    }
+//    // === Consul Config
+//    val consulModules = setOf(
+//        project(":gateway"),
+//        project(":accounts-service"),
+//        project(":cash-service"),
+//        project(":transfer-service"),
+//        project(":exchange-service"),
+//        project(":exchange-generator-service"),
+//        project(":notifications-service"),
+//        project(":blocker-service")
+//    )
+//    if (project in consulModules) {
+//        dependencies {
+//            implementation("org.springframework.cloud:spring-cloud-starter-consul-config")
+//        }
+//    }
 }
 
 // === gateway ===

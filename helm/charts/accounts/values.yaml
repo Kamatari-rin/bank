@@ -1,0 +1,30 @@
+image:
+  repository: "accounts-service"
+  tag: "dev"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8080
+
+resources: {}
+
+# чувствительные данные
+secrets:
+  SPRING_DATASOURCE_PASSWORD: "accounts_service_password"
+  KEYCLOAK_ADMIN_CLIENT_SECRET: "esrmqgGyMr98YXxND7Gl0SBXoUTUrPsl"
+
+# простые env
+env:
+  SPRING_APPLICATION_NAME: "accounts-service"
+  SPRING_PROFILES_ACTIVE: "k8s"
+  JAVA_OPTS: "-Xms256m -Xmx512m"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres.bank-dev.svc:5432/bank?currentSchema=accounts"
+  SPRING_DATASOURCE_USERNAME: "accounts_service_user"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
+
+  # если сервису нужен Keycloak Admin :
+  KEYCLOAK_ADMIN_BASE_URL: "http://keycloak-keycloak.bank-dev.svc:8080"
+  KEYCLOAK_ADMIN_REALM: "bank"
+  KEYCLOAK_ADMIN_CLIENT_ID: "accounts-service"
+  SPRING_CLOUD_CONSUL_CONFIG_ENABLED: "false"
+  SPRING_CLOUD_CONSUL_CONFIG_IMPORT_CHECK_ENABLED: "false"

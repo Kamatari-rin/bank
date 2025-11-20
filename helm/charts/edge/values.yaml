@@ -1,0 +1,53 @@
+ingress:
+  enabled: true
+  className: nginx
+  host: bank.local
+  tls: false
+
+cors:
+  enabled: true
+  allowedOrigins:
+    - "http://localhost:3000"
+  allowedMethods: "GET,POST,PUT,DELETE,OPTIONS"
+  allowedHeaders: "*"
+  allowCredentials: "true"
+
+# Карта маршрутов
+routes:
+  - path: /api/blocker(/|$)(.*)
+    service: blocker
+    port: 8080
+    rewriteTarget: /api/$2
+
+  - path: /api/notifications/internal(/|$)(.*)
+    service: notifications
+    port: 8080
+    rewriteTarget: /api/internal/$2
+  - path: /api/notifications/public(/|$)(.*)
+    service: notifications
+    port: 8080
+    rewriteTarget: /api/public/$2
+
+  - path: /api/cash(/|$)(.*)
+    service: cash
+    port: 8080
+    rewriteTarget: /api/$2
+
+  - path: /api/accounts/internal(/|$)(.*)
+    service: accounts
+    port: 8080
+    rewriteTarget: /api/internal/$2
+  - path: /api/accounts(/|$)(.*)
+    service: accounts
+    port: 8080
+    rewriteTarget: /api/$2
+
+  - path: /api/transfer(/|$)(.*)
+    service: transfer
+    port: 8080
+    rewriteTarget: /api/$2
+
+  - path: /api/exchange(/|$)(.*)
+    service: exchange
+    port: 8080
+    rewriteTarget: /api/$2

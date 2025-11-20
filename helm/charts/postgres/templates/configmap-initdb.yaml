@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-initdb
+  namespace: {{ .Release.Namespace }}
+data:
+{{- $files := .Files.Glob "files/initdb/*" -}}
+{{- range $path, $file := $files }}
+  {{ base $path }}: |
+{{ $file | toString | indent 4 }}
+{{- end }}
