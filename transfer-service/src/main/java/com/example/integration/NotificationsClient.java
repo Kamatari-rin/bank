@@ -1,10 +1,11 @@
 package com.example.integration;
 
+import com.example.dto.NotifyCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.oauth2.client.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.UUID;
 
@@ -13,34 +14,29 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class NotificationsClient {
 
-    private final WebClient gatewayWebClient;
-    private final OAuth2AuthorizedClientManager clientManager;
+    private final KafkaTemplate<String, NotifyCommand> kafkaTemplate;
 
-    private String ccToken() {
-        var req = OAuth2AuthorizeRequest.withClientRegistrationId("transfer")
-                .principal("transfer")
-                .build();
-        var client = clientManager.authorize(req);
-        if (client == null || client.getAccessToken() == null)
-            throw new IllegalStateException("Cannot obtain cc token for transfer");
-        return client.getAccessToken().getTokenValue();
-    }
+    @Value("${app.kafka.notifications-topic}")
+    private String topic;
 
     public void notify(UUID userId, String type, String title, String message) {
-        var token = ccToken();
-        try {
-            gatewayWebClient.post()
-                    .uri("/api/notifications/internal/notify")
-                    .headers(h -> h.setBearerAuth(token))
-                    .bodyValue(new Body(type, userId, title, message))
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block();
-            log.info("notify sent: type={} user={} title='{}'", type, userId, title);
-        } catch (Exception e) {
-            log.warn("notify failed: {}", e.toString());
-        }
-    }
+        String enrichedTitle = "[%s] %s".formatted(type, title);
 
-    private record Body(String type, UUID userId, String title, String message) {}
+        NotifyCommand cmd = new NotifyCommand(userId, enrichedTitle, message);
+
+        kafkaTemplate
+                .send(topic, userId.toString(), cmd)
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.warn("Failed to send notification to Kafka userId={} type={} title={} error={}",
+                                userId, type, title, ex.toString(), ex);
+                    } else {
+                        log.info("Notification sent to Kafka topic={} partition={} offset={} userId={} type={} title={}",
+                                result.getRecordMetadata().topic(),
+                                result.getRecordMetadata().partition(),
+                                result.getRecordMetadata().offset(),
+                                userId, type, title);
+                    }
+                });
+    }
 }

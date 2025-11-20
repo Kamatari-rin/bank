@@ -9,6 +9,9 @@ service:
 resources: {}
 
 env:
+  KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"
+  KAFKA_TOPIC_EXCHANGE_RATES: "bank.exchange-rates"
+  KAFKA_EXCHANGE_GROUP: "exchange-service"
   SPRING_APPLICATION_NAME: "exchange-service"
   SPRING_PROFILES_ACTIVE: "k8s"
   JAVA_OPTS: "-Xms128m -Xmx256m"

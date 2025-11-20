@@ -1,0 +1,56 @@
+pipeline {
+  agent any
+
+  options {
+    ansiColor('xterm')
+    timestamps()
+  }
+
+  parameters {
+    choice(name: 'ENV', choices: ['dev', 'test', 'prod'], description: 'Целевое окружение')
+    string(name: 'NAMESPACE', defaultValue: 'bank-dev', description: 'K8s namespace')
+    booleanParam(name: 'RUN_HELM_TESTS', defaultValue: false, description: 'Запустить helm test для Kafka (если добавите)')
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Helm lint (kafka)') {
+      steps {
+        sh """
+          helm lint helm/charts/kafka
+        """
+      }
+    }
+
+    stage('Helm upgrade/install Kafka') {
+      steps {
+        sh """
+          helm upgrade --install bank-kafka ./helm/charts/kafka \\
+            -n ${NAMESPACE} --create-namespace
+        """
+      }
+    }
+
+    stage('Helm tests (kafka)') {
+      when { expression { return params.RUN_HELM_TESTS } }
+      steps {
+        sh """
+          # Если добавишь helm test для kafka-чарта,
+          # можно вызывать его так:
+          helm test bank-kafka -n ${NAMESPACE} --logs || true
+        """
+      }
+    }
+  }
+
+  post {
+    always {
+      echo "Kafka pipeline finished. ENV=${params.ENV}, NAMESPACE=${params.NAMESPACE}"
+    }
+  }
+}

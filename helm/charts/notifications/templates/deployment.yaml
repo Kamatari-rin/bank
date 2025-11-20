@@ -26,8 +26,12 @@ spec:
               value: "{{ .Values.env.SPRING_PROFILES_ACTIVE }}"
             - name: JAVA_OPTS
               value: "{{ .Values.env.JAVA_OPTS }}"
-            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
-              value: "{{ .Values.env.SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI }}"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.env.KAFKA_BOOTSTRAP_SERVERS }}"
+            - name: KAFKA_TOPIC_NOTIFICATIONS
+              value: "{{ .Values.env.KAFKA_TOPIC_NOTIFICATIONS }}"
+            - name: KAFKA_NOTIFICATIONS_GROUP
+              value: "{{ .Values.env.KAFKA_NOTIFICATIONS_GROUP }}"
           volumeMounts:
             - name: app-config
               mountPath: /config

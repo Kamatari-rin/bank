@@ -31,7 +31,10 @@ spec:
               value: "{{ .Values.env.ACCOUNTS_BASE_URL }}"
             - name: NOTIFICATIONS_BASE_URL
               value: "{{ .Values.env.NOTIFICATIONS_BASE_URL }}"
-
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.env.KAFKA_BOOTSTRAP_SERVERS }}"
+            - name: KAFKA_TOPIC_NOTIFICATIONS
+              value: "{{ .Values.env.KAFKA_TOPIC_NOTIFICATIONS }}"
             - name: OAUTH2_TOKEN_URI
               value: "{{ .Values.env.OAUTH2_TOKEN_URI }}"
             - name: OAUTH2_JWK_SET_URI

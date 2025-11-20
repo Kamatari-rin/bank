@@ -2,6 +2,14 @@ server:
   port: 8080
 
 spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: exchange-service
+      auto-offset-reset: latest
+      enable-auto-commit: true     # at most once → commit BEFORE processing
+    properties:
+      spring.json.trusted.packages: "com.example.dto"
   application:
     name: exchange-service
   security:
@@ -15,6 +23,11 @@ management:
     web:
       exposure:
         include: health,info
+
+app:
+  kafka:
+    exchange-topic: ${KAFKA_TOPIC_EXCHANGE_RATES:bank.exchange-rates}
+    exchange-group: exchange-service
 
 logging:
   level:

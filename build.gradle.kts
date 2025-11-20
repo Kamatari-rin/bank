@@ -22,7 +22,6 @@ allprojects {
     }
 }
 
-
 tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
     group = "verification"
     description = "Checks for outdated dependencies"
@@ -48,6 +47,7 @@ subprojects {
         }
     }
 
+    // ==== Общие тестовые и утилитные зависимости ====
     dependencies {
         // Lombok
         compileOnly("org.projectlombok:lombok:$lombokVersion")
@@ -68,7 +68,23 @@ subprojects {
         useJUnitPlatform()
     }
 
-    // Модули с JPA/БД
+    // ==== Kafka-модули (продюсеры/консьюмеры) ====
+    val kafkaModules = setOf(
+        project(":accounts-service"),
+        project(":cash-service"),
+        project(":transfer-service"),
+        project(":exchange-service"),
+        project(":exchange-generator-service"),
+        project(":notifications-service"),
+    )
+    if (project in kafkaModules) {
+        dependencies {
+            implementation("org.springframework.kafka:spring-kafka")
+            testImplementation("org.springframework.kafka:spring-kafka-test")
+        }
+    }
+
+    // ==== Модули с JPA/БД ====
     val jpaModules = setOf(
         project(":accounts-service"),
     )
@@ -76,20 +92,17 @@ subprojects {
         dependencies {
             implementation("org.springframework.boot:spring-boot-starter-data-jpa")
             runtimeOnly("org.postgresql:postgresql")
-
             implementation("org.springframework:spring-webflux")
         }
     }
 
-    // Ресурсные серверы (JWT)
+    // ==== Ресурсные серверы (JWT) ====
     val resourceServerModules = jpaModules + setOf(
         project(":cash-service"),
         project(":transfer-service"),
         project(":exchange-service"),
         project(":blocker-service"),
-        project(":notifications-service"),
     )
-
     if (project in resourceServerModules) {
         dependencies {
             implementation(project(":common-lib"))
@@ -102,14 +115,14 @@ subprojects {
         }
     }
 
-    // Клиентские модули (исходящие вызовы с client_credentials)
+    // ==== Клиентские модули (исходящие вызовы с client_credentials) ====
     val clientModules = setOf(
         project(":exchange-generator-service"),
         project(":accounts-service"),
         project(":cash-service"),
         project(":transfer-service"),
         project(":blocker-service"),
-        project(":notifications-service"),
+        // project(":notifications-service"), // <--- убрали
     )
     if (project in clientModules) {
         dependencies {
@@ -122,7 +135,20 @@ subprojects {
         }
     }
 
-//    // === Consul Config
+    // ==== Notifications: чистый Kafka-воркер без Web ====
+    val notificationsModules = setOf(
+        project(":notifications-service"),
+    )
+    if (project in notificationsModules) {
+        dependencies {
+            // без common-lib, чтобы не тащить oauth2-resource-server
+            implementation("org.springframework.boot:spring-boot-starter")
+            implementation("org.springframework.boot:spring-boot-starter-actuator")
+            // spring-kafka уже добавлен через kafkaModules
+        }
+    }
+
+//    // === Consul Config (исторически, сейчас не используем)
 //    val consulModules = setOf(
 //        project(":gateway"),
 //        project(":accounts-service"),

@@ -22,6 +22,9 @@ env:
   SPRING_DATASOURCE_USERNAME: "accounts_service_user"
   SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
 
+  KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"
+  KAFKA_TOPIC_NOTIFICATIONS: "bank.notifications"
+
   # если сервису нужен Keycloak Admin :
   KEYCLOAK_ADMIN_BASE_URL: "http://keycloak-keycloak.bank-dev.svc:8080"
   KEYCLOAK_ADMIN_REALM: "bank"
