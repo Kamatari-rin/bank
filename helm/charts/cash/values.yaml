@@ -9,6 +9,7 @@ service:
 resources: {}
 
 env:
+  ZIPKIN_ENDPOINT: "http://zipkin:9411/api/v2/spans"
   SPRING_APPLICATION_NAME: "cash-service"
   SPRING_PROFILES_ACTIVE: "k8s"
   JAVA_OPTS: "-Xms128m -Xmx256m"
@@ -19,6 +20,8 @@ env:
 
   KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"
   KAFKA_TOPIC_NOTIFICATIONS: "bank.notifications"
+  LOG_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  LOG_KAFKA_TOPIC: "bank-logs"
 
   # OAuth2 client-credentials для вызова других сервисов
   OAUTH2_TOKEN_URI: "http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/token"

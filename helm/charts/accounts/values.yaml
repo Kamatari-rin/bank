@@ -15,6 +15,7 @@ secrets:
 
 # простые env
 env:
+  ZIPKIN_ENDPOINT: "http://zipkin:9411/api/v2/spans"
   SPRING_APPLICATION_NAME: "accounts-service"
   SPRING_PROFILES_ACTIVE: "k8s"
   JAVA_OPTS: "-Xms256m -Xmx512m"
@@ -24,7 +25,8 @@ env:
 
   KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"
   KAFKA_TOPIC_NOTIFICATIONS: "bank.notifications"
-
+  LOG_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  LOG_KAFKA_TOPIC: "bank-logs"
   # если сервису нужен Keycloak Admin :
   KEYCLOAK_ADMIN_BASE_URL: "http://keycloak-keycloak.bank-dev.svc:8080"
   KEYCLOAK_ADMIN_REALM: "bank"

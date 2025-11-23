@@ -9,10 +9,12 @@ service:
 resources: {}
 
 env:
+  ZIPKIN_ENDPOINT: "http://zipkin:9411/api/v2/spans"
   SPRING_APPLICATION_NAME: "blocker-service"
   SPRING_PROFILES_ACTIVE: "k8s"
   JAVA_OPTS: "-Xms128m -Xmx256m"
-
+  LOG_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  LOG_KAFKA_TOPIC: "bank-logs"
   # JWT валидация от Keycloak
   OAUTH2_JWK_SET_URI: "http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs"
   NOTIFICATIONS_BASE_URL: "http://notifications.bank-dev.svc:8080"

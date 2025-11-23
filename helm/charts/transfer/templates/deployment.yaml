@@ -18,6 +18,8 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: ZIPKIN_ENDPOINT
+              value: "{{ .Values.env.ZIPKIN_ENDPOINT }}"
             - name: SPRING_CONFIG_ADDITIONAL_LOCATION
               value: "file:/config/"
             - name: SPRING_APPLICATION_NAME
@@ -30,6 +32,8 @@ spec:
               value: "{{ .Values.env.KAFKA_BOOTSTRAP_SERVERS }}"
             - name: KAFKA_TOPIC_NOTIFICATIONS
               value: "{{ .Values.env.KAFKA_TOPIC_NOTIFICATIONS }}"
+            - name: LOG_KAFKA_TOPIC
+              value: "{{ .Values.env.LOG_KAFKA_TOPIC }}"
             - name: ACCOUNTS_BASE_URL
               value: "{{ .Values.env.ACCOUNTS_BASE_URL }}"
             - name: EXCHANGE_BASE_URL

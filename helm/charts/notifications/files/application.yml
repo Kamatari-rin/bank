@@ -9,20 +9,47 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-    consumer:
-      auto-offset-reset: latest
-      properties:
-        spring.json.trusted.packages: "com.example.dto"
 
-app:
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-    notifications-topic: ${KAFKA_TOPIC_NOTIFICATIONS:bank.notifications}
-    notifications-group-id: ${KAFKA_NOTIFICATIONS_GROUP:notifications-service}
+# ======================================
+#  Micrometer Tracing + Zipkin
+# ======================================
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    prometheus:
+      enabled: true
+  health:
+    livenessstate.enabled: true
+    readinessstate.enabled: true
+    probes.enabled: true
+
+  # ---- ACTUATOR + METRICS ----
+  metrics:
+    enable:
+      all: true
+
+  # ---- TRACING ----
+  tracing:
+    sampling:
+      probability: 1.0
+
+  # ---- ZIPKIN ----
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
 
 logging:
   level:
     org.springframework.security: DEBUG
-    org.springframework.kafka: INFO
+    org.springframework.cloud.consul.config: DEBUG
+    org.springframework.cloud.consul: DEBUG
+    org.springframework.web: INFO
+    io.micrometer: INFO

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+        - name: elasticsearch
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: discovery.type
+              value: "{{ .Values.env.discovery_type }}"
+            - name: xpack.security.enabled
+              value: "{{ .Values.env.xpack.security.enabled }}"
+            - name: ES_JAVA_OPTS
+              value: "{{ .Values.env.ES_JAVA_OPTS }}"
+          ports:
+            - containerPort: 9200
+          resources:
+{{ toYaml .Values.resources | indent 12 }}

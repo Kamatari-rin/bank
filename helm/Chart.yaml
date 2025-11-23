@@ -1,4 +1,3 @@
-# helm/Chart.yaml
 apiVersion: v2
 name: bank
 description: Umbrella chart for bank microservices

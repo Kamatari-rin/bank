@@ -1,0 +1,16 @@
+image:
+  repository: grafana/grafana
+  tag: "10.4.0"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 3000
+
+admin:
+  user: "admin"
+  password: "admin"
+
+prometheus:
+  url: "http://prometheus:9090"
+
+resources: {}

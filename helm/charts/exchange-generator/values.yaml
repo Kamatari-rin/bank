@@ -11,10 +11,12 @@ resources: {}
 env:
   KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"
   KAFKA_TOPIC_EXCHANGE_RATES: "bank.exchange-rates"
+  LOG_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  LOG_KAFKA_TOPIC: "bank-logs"
   SPRING_APPLICATION_NAME: "exchange-generator-service"
   SPRING_PROFILES_ACTIVE: "k8s"
   JAVA_OPTS: "-Xms128m -Xmx256m"
-
+  ZIPKIN_ENDPOINT: "http://zipkin:9411/api/v2/spans"
   EXCHANGE_BASE_URL: "http://exchange.bank-dev.svc:8080"
 
   OAUTH2_TOKEN_URI: "http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/token"

@@ -1,6 +1,7 @@
 package com.example.kafka;
 
 import com.example.dto.exchange.ExchangeRateMessage;
+import com.example.metrics.ExchangeMetrics;
 import com.example.service.RateStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class ExchangeRateListener {
 
     private final RateStore store;
+    private final ExchangeMetrics metrics;
 
     @KafkaListener(
             topics = "${app.kafka.exchange-topic}",
@@ -20,12 +22,21 @@ public class ExchangeRateListener {
             containerFactory = "exchangeKafkaListenerContainerFactory"
     )
     public void onRate(ExchangeRateMessage msg) {
-        msg.rates().values().forEach(row ->
-                store.put(new com.example.model.RateRow(row.currency(), row.buy(), row.sell()))
-        );
+        try {
+            msg.rates().values().forEach(row ->
+                    store.put(new com.example.model.RateRow(row.currency(), row.buy(), row.sell()))
+            );
 
-        log.info("Updated rates from Kafka. base={} currencies={}",
-                msg.baseCurrency(),
-                msg.rates().keySet());
+            metrics.markSuccess();
+
+            log.info("Updated rates from Kafka. base={} currencies={}",
+                    msg.baseCurrency(),
+                    msg.rates().keySet());
+
+        } catch (Exception e) {
+            metrics.markFailure();
+            log.error("Failed to process exchange rates message: {}", e.toString(), e);
+            throw e;
+        }
     }
 }

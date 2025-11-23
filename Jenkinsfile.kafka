@@ -7,41 +7,84 @@ pipeline {
   }
 
   parameters {
-    choice(name: 'ENV', choices: ['dev', 'test', 'prod'], description: 'Целевое окружение')
-    string(name: 'NAMESPACE', defaultValue: 'bank-dev', description: 'K8s namespace')
-    booleanParam(name: 'RUN_HELM_TESTS', defaultValue: false, description: 'Запустить helm test для Kafka (если добавите)')
+    choice(
+      name: 'ENV',
+      choices: ['dev', 'test', 'prod'],
+      description: 'Целевое окружение'
+    )
+    string(
+      name: 'NAMESPACE',
+      defaultValue: 'bank-dev',
+      description: 'K8s namespace'
+    )
+    booleanParam(
+      name: 'RUN_HELM_TESTS',
+      defaultValue: false,
+      description: 'Запустить helm test (если есть)'
+    )
   }
 
   stages {
+
     stage('Checkout') {
       steps {
         checkout scm
       }
     }
 
-    stage('Helm lint (kafka)') {
+    stage('Helm lint (Kafka + Observability)') {
       steps {
         sh """
           helm lint helm/charts/kafka
+          helm lint helm/charts/zipkin
+          helm lint helm/charts/prometheus
+          helm lint helm/charts/grafana
+          helm lint helm/charts/elasticsearch
+          helm lint helm/charts/logstash
+          helm lint helm/charts/kibana
         """
       }
     }
 
-    stage('Helm upgrade/install Kafka') {
+    stage('Deploy Kafka & Observability Stack') {
       steps {
         sh """
+          # --- Kafka Cluster ----
           helm upgrade --install bank-kafka ./helm/charts/kafka \\
             -n ${NAMESPACE} --create-namespace
+
+          # --- Zipkin (Tracing) ---
+          helm upgrade --install zipkin ./helm/charts/zipkin \\
+            -n ${NAMESPACE}
+
+          # --- Prometheus (Metrics) ---
+          helm upgrade --install prometheus ./helm/charts/prometheus \\
+            -n ${NAMESPACE}
+
+          # --- Grafana (Dashboards) ---
+          helm upgrade --install grafana ./helm/charts/grafana \\
+            -n ${NAMESPACE}
+
+          # --- Elasticsearch (Log storage) ---
+          helm upgrade --install elasticsearch ./helm/charts/elasticsearch \\
+            -n ${NAMESPACE}
+
+          # --- Logstash (Kafka -> Elasticsearch) ---
+          helm upgrade --install logstash ./helm/charts/logstash \\
+            -n ${NAMESPACE}
+
+          # --- Kibana (Log viewer) ---
+          helm upgrade --install kibana ./helm/charts/kibana \\
+            -n ${NAMESPACE}
         """
       }
     }
 
-    stage('Helm tests (kafka)') {
+    stage('Helm tests (optional)') {
       when { expression { return params.RUN_HELM_TESTS } }
       steps {
         sh """
-          # Если добавишь helm test для kafka-чарта,
-          # можно вызывать его так:
+          # Если будут тесты – запускать так:
           helm test bank-kafka -n ${NAMESPACE} --logs || true
         """
       }
@@ -50,7 +93,7 @@ pipeline {
 
   post {
     always {
-      echo "Kafka pipeline finished. ENV=${params.ENV}, NAMESPACE=${params.NAMESPACE}"
+      echo "Kafka + Observability pipeline finished. ENV=${params.ENV}, NAMESPACE=${params.NAMESPACE}"
     }
   }
 }

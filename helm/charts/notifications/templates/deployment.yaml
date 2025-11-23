@@ -18,6 +18,8 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: ZIPKIN_ENDPOINT
+              value: "{{ .Values.env.ZIPKIN_ENDPOINT }}"
             - name: SPRING_CONFIG_ADDITIONAL_LOCATION
               value: "file:/config/"
             - name: SPRING_APPLICATION_NAME
@@ -32,6 +34,8 @@ spec:
               value: "{{ .Values.env.KAFKA_TOPIC_NOTIFICATIONS }}"
             - name: KAFKA_NOTIFICATIONS_GROUP
               value: "{{ .Values.env.KAFKA_NOTIFICATIONS_GROUP }}"
+            - name: LOG_KAFKA_TOPIC
+              value: "{{ .Values.env.LOG_KAFKA_TOPIC }}"
           volumeMounts:
             - name: app-config
               mountPath: /config

@@ -92,15 +92,41 @@ pipeline {
       }
     }
 
-    stage('Helm upgrade/install Kafka') {
-          when { expression { return params.DEPLOY_KAFKA } }
-          steps {
-            sh """
-              helm upgrade --install bank-kafka ./helm/charts/kafka \\
-                -n ${NAMESPACE} --create-namespace
-            """
-          }
+    stage('Helm upgrade/install Kafka & Observability') {
+      when { expression { return params.DEPLOY_KAFKA } }
+      steps {
+        sh """
+          # Kafka (кластер + топики, в т.ч. bank-logs)
+          helm upgrade --install bank-kafka ./helm/charts/kafka \\
+            -n ${NAMESPACE} --create-namespace
+
+          # Zipkin (распределённый трейсинг)
+          helm upgrade --install zipkin ./helm/charts/zipkin \\
+            -n ${NAMESPACE}
+
+          # Prometheus (сбор метрик)
+          helm upgrade --install prometheus ./helm/charts/prometheus \\
+            -n ${NAMESPACE}
+
+          # Grafana (дашборды)
+          helm upgrade --install grafana ./helm/charts/grafana \\
+            -n ${NAMESPACE}
+
+          # Elasticsearch (хранилище логов)
+          helm upgrade --install elasticsearch ./helm/charts/elasticsearch \\
+            -n ${NAMESPACE}
+
+          # Logstash (Kafka → ES)
+          helm upgrade --install logstash ./helm/charts/logstash \\
+            -n ${NAMESPACE}
+
+          # Kibana (UI для логов)
+          helm upgrade --install kibana ./helm/charts/kibana \\
+            -n ${NAMESPACE}
+        """
+      }
     }
+
 
     stage('Helm upgrade/install') {
       when { expression { return params.DEPLOY } }

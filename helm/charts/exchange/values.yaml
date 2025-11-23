@@ -9,9 +9,12 @@ service:
 resources: {}
 
 env:
+  ZIPKIN_ENDPOINT: "http://zipkin:9411/api/v2/spans"
   KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"
   KAFKA_TOPIC_EXCHANGE_RATES: "bank.exchange-rates"
   KAFKA_EXCHANGE_GROUP: "exchange-service"
+  LOG_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  LOG_KAFKA_TOPIC: "bank-logs"
   SPRING_APPLICATION_NAME: "exchange-service"
   SPRING_PROFILES_ACTIVE: "k8s"
   JAVA_OPTS: "-Xms128m -Xmx256m"
