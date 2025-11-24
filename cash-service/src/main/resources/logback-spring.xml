@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <springProperty scope="context" name="springAppName"
+                    source="spring.application.name"
+                    defaultValue="bank-service"/>
+
+    <!-- Kafka для логов -->
+    <property name="LOG_KAFKA_BOOTSTRAP_SERVERS"
+              value="${LOG_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}"/>
+    <property name="LOG_KAFKA_TOPIC"
+              value="${LOG_KAFKA_TOPIC:bank-logs}"/>
+
+    <!-- JSON в stdout (для локалки/отладки и на случай, если Kafka недоступна) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventJsonEncoder"/>
+    </appender>
+
+    <!-- Kafka appender: шлём логи в общий топик -->
+    <appender name="KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventJsonEncoder"/>
+        <topic>${LOG_KAFKA_TOPIC}</topic>
+
+        <producerConfig>bootstrap.servers=${LOG_KAFKA_BOOTSTRAP_SERVERS}</producerConfig>
+        <producerConfig>acks=1</producerConfig>
+        <producerConfig>linger.ms=50</producerConfig>
+        <producerConfig>batch.size=32768</producerConfig>
+    </appender>
+
+    <!-- Корневой логгер -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="KAFKA"/>
+    </root>
+
+    <logger name="org.springframework.security" level="INFO"/>
+    <logger name="org.springframework.web" level="INFO"/>
+
+</configuration>

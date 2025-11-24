@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+        - name: logstash
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: LS_JAVA_OPTS
+              value: "{{ .Values.env.LS_JAVA_OPTS }}"
+          volumeMounts:
+            - name: pipeline
+              mountPath: /usr/share/logstash/pipeline
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      volumes:
+        - name: pipeline
+          configMap:
+            name: logstash-pipeline

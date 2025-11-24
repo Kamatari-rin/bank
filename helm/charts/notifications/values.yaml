@@ -9,9 +9,14 @@ service:
 resources: {}
 
 env:
+  LOG_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  LOG_KAFKA_TOPIC: "bank-logs"
   SPRING_APPLICATION_NAME: "notifications-service"
   SPRING_PROFILES_ACTIVE: "k8s"
   JAVA_OPTS: "-Xms128m -Xmx256m"
+  ZIPKIN_ENDPOINT: "http://zipkin:9411/api/v2/spans"
+  # если сервис валидирует JWT, укажем jwk-set-uri на кейклок
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs"
 
   # Kafka-настройки (по-хорошему переопределяются в values-dev/test/prod)
   KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"

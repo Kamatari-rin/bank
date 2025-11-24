@@ -35,6 +35,9 @@ spring:
         jwt:
           jwk-set-uri: http://keycloak-keycloak.bank-dev.svc:8080/realms/bank/protocol/openid-connect/certs
 
+# ======================================
+#  Micrometer Tracing + Zipkin
+# ======================================
 management:
   endpoints:
     web:
@@ -46,15 +49,27 @@ management:
       show-details: always
       probes:
         enabled: true
+    prometheus:
+      enabled: true
   health:
-    livenessstate:
-      enabled: true
-    readinessstate:
-      enabled: true
-    probes:
-      enabled: true
-  security:
-    enabled: false
+    livenessstate.enabled: true
+    readinessstate.enabled: true
+    probes.enabled: true
+
+  # ---- ACTUATOR + METRICS ----
+  metrics:
+    enable:
+      all: true
+
+  # ---- TRACING ----
+  tracing:
+    sampling:
+      probability: 1.0
+
+  # ---- ZIPKIN ----
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
 
 app:
   kafka:
@@ -65,3 +80,5 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.cloud.consul.config: DEBUG
     org.springframework.cloud.consul: DEBUG
+    org.springframework.web: INFO
+    io.micrometer: INFO

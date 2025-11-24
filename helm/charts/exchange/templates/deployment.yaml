@@ -18,6 +18,12 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: LOG_KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.env.LOG_KAFKA_BOOTSTRAP_SERVERS }}"
+            - name: LOG_KAFKA_TOPIC
+              value: "{{ .Values.env.LOG_KAFKA_TOPIC }}"
+            - name: ZIPKIN_ENDPOINT
+              value: "{{ .Values.env.ZIPKIN_ENDPOINT }}"
             - name: SPRING_CONFIG_ADDITIONAL_LOCATION
               value: "file:/config/"
             - name: SPRING_APPLICATION_NAME

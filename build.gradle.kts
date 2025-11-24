@@ -22,6 +22,7 @@ allprojects {
     }
 }
 
+
 tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
     group = "verification"
     description = "Checks for outdated dependencies"
@@ -47,7 +48,6 @@ subprojects {
         }
     }
 
-    // ==== Общие тестовые и утилитные зависимости ====
     dependencies {
         // Lombok
         compileOnly("org.projectlombok:lombok:$lombokVersion")
@@ -62,10 +62,25 @@ subprojects {
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
         testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
+        implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+        implementation("com.github.danielwegener:logback-kafka-appender:0.2.0")
     }
 
     tasks.withType<Test> {
         useJUnitPlatform()
+    }
+
+    // Модули с JPA/БД
+    val jpaModules = setOf(
+        project(":accounts-service"),
+    )
+    if (project in jpaModules) {
+        dependencies {
+            implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+            runtimeOnly("org.postgresql:postgresql")
+
+            implementation("org.springframework:spring-webflux")
+        }
     }
 
     // ==== Kafka-модули (продюсеры/консьюмеры) ====
@@ -84,25 +99,15 @@ subprojects {
         }
     }
 
-    // ==== Модули с JPA/БД ====
-    val jpaModules = setOf(
-        project(":accounts-service"),
-    )
-    if (project in jpaModules) {
-        dependencies {
-            implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-            runtimeOnly("org.postgresql:postgresql")
-            implementation("org.springframework:spring-webflux")
-        }
-    }
-
-    // ==== Ресурсные серверы (JWT) ====
+    // Ресурсные серверы (JWT)
     val resourceServerModules = jpaModules + setOf(
         project(":cash-service"),
         project(":transfer-service"),
         project(":exchange-service"),
         project(":blocker-service"),
+        project(":notifications-service"),
     )
+
     if (project in resourceServerModules) {
         dependencies {
             implementation(project(":common-lib"))
@@ -115,14 +120,53 @@ subprojects {
         }
     }
 
-    // ==== Клиентские модули (исходящие вызовы с client_credentials) ====
+    // Модули, которые участвуют в трейсинге (HTTP + Kafka + DB)
+    val tracingModules = setOf(
+        project(":accounts-service"),
+        project(":cash-service"),
+        project(":transfer-service"),
+        project(":exchange-service"),
+        project(":exchange-generator-service"),
+        project(":notifications-service"),
+        project(":blocker-service"),
+        project(":gateway")
+    )
+
+    if (project in tracingModules) {
+        dependencies {
+            implementation("org.springframework.boot:spring-boot-starter-actuator")
+            implementation("io.micrometer:micrometer-tracing-bridge-brave")
+            implementation("io.zipkin.reporter2:zipkin-reporter-brave")
+        }
+    }
+
+    // Модули, которые отдают метрики в Prometheus
+    val metricsModules = setOf(
+        project(":accounts-service"),
+        project(":cash-service"),
+        project(":transfer-service"),
+        project(":exchange-service"),
+        project(":exchange-generator-service"),
+        project(":notifications-service"),
+        project(":blocker-service"),
+        project(":gateway")
+    )
+
+    if (project in metricsModules) {
+        dependencies {
+            implementation("org.springframework.boot:spring-boot-starter-actuator")
+            implementation("io.micrometer:micrometer-registry-prometheus")
+        }
+    }
+
+    // Клиентские модули (исходящие вызовы с client_credentials)
     val clientModules = setOf(
         project(":exchange-generator-service"),
         project(":accounts-service"),
         project(":cash-service"),
         project(":transfer-service"),
         project(":blocker-service"),
-        // project(":notifications-service"), // <--- убрали
+        project(":notifications-service"),
     )
     if (project in clientModules) {
         dependencies {
@@ -135,20 +179,7 @@ subprojects {
         }
     }
 
-    // ==== Notifications: чистый Kafka-воркер без Web ====
-    val notificationsModules = setOf(
-        project(":notifications-service"),
-    )
-    if (project in notificationsModules) {
-        dependencies {
-            // без common-lib, чтобы не тащить oauth2-resource-server
-            implementation("org.springframework.boot:spring-boot-starter")
-            implementation("org.springframework.boot:spring-boot-starter-actuator")
-            // spring-kafka уже добавлен через kafkaModules
-        }
-    }
-
-//    // === Consul Config (исторически, сейчас не используем)
+//    // === Consul Config
 //    val consulModules = setOf(
 //        project(":gateway"),
 //        project(":accounts-service"),

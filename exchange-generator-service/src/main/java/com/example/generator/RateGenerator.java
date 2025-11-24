@@ -2,6 +2,7 @@ package com.example.generator;
 
 import com.example.dto.exchange.ExchangeRateMessage;
 import com.example.dto.exchange.RateRowMessage;
+import com.example.metrics.ExchangeGeneratorMetrics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,13 +24,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RateGenerator {
 
     private final KafkaTemplate<String, ExchangeRateMessage> kafka;
+    private final ExchangeGeneratorMetrics metrics;
 
     @Value("${app.kafka.exchange-topic}")
     private String topic;
 
     @Scheduled(fixedDelay = 1000)
     public void tick() {
-
         var msg = new ExchangeRateMessage(
                 "RUB",
                 Map.of(
@@ -42,15 +43,13 @@ public class RateGenerator {
         kafka.send(topic, "exchange-rates", msg)
                 .whenComplete((res, ex) -> {
                     if (ex != null) {
+                        metrics.markFailure();
                         log.warn("Failed to send exchange rates: {}", ex.toString());
                     } else {
+                        metrics.markSuccess();
                         log.info("Exchange rates sent: currencies={}", msg.rates().keySet());
                     }
                 });
-    }
-
-    private static RateRowMessage row(String currency, double buy, double sell, double spread) {
-        return new RateRowMessage(currency, jiggle(buy, spread), jiggle(sell, spread));
     }
 
     private static BigDecimal jiggle(double base, double spread) {

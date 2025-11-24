@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: {{ .Release.Namespace }}
+data:
+  bank-rules.yml: |
+    groups:
+      - name: bank-http
+        rules:
+          - alert: HighErrorRate
+            expr: rate(http_server_requests_seconds_count{outcome="SERVER_ERROR"}[5m])
+              / rate(http_server_requests_seconds_count[5m]) > 0.05
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High HTTP 5xx error rate"
+              description: "More than 5% of all requests returned 5xx in bank services"
+
+      - name: bank-business
+        rules:
+          - alert: ExchangeRatesStale
+            expr: time() - exchange_rates_last_update_epoch_seconds > 60
+            for: 1m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Rates not updated"
+              description: "exchange-service hasn't updated currency rates for more than 60 seconds"
+
+          - alert: ExchangeGeneratorDown
+            expr: time() - exchange_generator_last_push_epoch_seconds > 60
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Exchange generator down"
+              description: "exchange-generator-service hasn't pushed any FX rates for over 60 seconds"
